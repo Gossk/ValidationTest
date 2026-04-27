@@ -2,8 +2,9 @@
 
 ## Appointment-Scheduling
 
-- Appointment-Service
+### Appointment-Service
 
+```csharp
 namespace Appointment_Scheduling;
 
 public interface IRepository
@@ -21,7 +22,7 @@ public class AppointmentService
     }
 
     public bool CanSchedule(int current, int max)
-    { 
+    {
         return current < max;
     }
 
@@ -31,14 +32,16 @@ public class AppointmentService
             return false;
         if (current >= max)
             return false;
+
         _repo.Save(petname);
         return true;
     }
-    
-    
 }
+```
 
-- FakeRepository
+### FakeRepository
+
+```csharp
 namespace Appointment_Scheduling;
 
 public class FakeRepository : IRepository
@@ -49,12 +52,12 @@ public class FakeRepository : IRepository
     {
         SavedAppointments.Add(petname);
     }
-
 }
+```
 
+### Schedule-Appointment-Tests
 
--Schedule-Appointment-Tests
-
+```csharp
 using Appointment_Scheduling;
 using Xunit;
 using Moq;
@@ -67,90 +70,70 @@ public class Tests
     [Fact]
     public void ShouldReturnTrue_WhenThereIsSpace()
     {
-        //Arrange
         var mockRepo = new Mock<IRepository>();
         var service = new AppointmentService(mockRepo.Object);
-        //Act
+
         var result = service.CanSchedule(2, 5);
-        //Assert
-        Xunit.Assert.True(result);
+
+        Assert.True(result);
     }
 
     [Fact]
     public void ShouldReturnFalse_WhenScheduleIsFull()
     {
-        //Arrange
         var mockRepo = new Mock<IRepository>();
         var service = new AppointmentService(mockRepo.Object);
-        //Act
+
         var result = service.Schedule("Shaylo", 5, 5);
-        //Assert
-        Xunit.Assert.False(result);
+
+        Assert.False(result);
     }
 
     [Fact]
     public void ShouldReturnToRepository_WhenTheAppointmentIsValid()
     {
-        //Arrange
         var mockRepo = new Mock<IRepository>();
         var service = new AppointmentService(mockRepo.Object);
-        //Act
-        var result = service.Schedule("Shaylo", 2, 5);
-        //Assert
+
+        service.Schedule("Shaylo", 2, 5);
+
         mockRepo.Verify(r => r.Save("Shaylo"), Times.Once);
     }
 
     [Fact]
     public void ShouldSaveAppointment_WhenUsingRealRepository()
     {
-        //Arrange
         var repo = new FakeRepository();
         var service = new AppointmentService(repo);
-        //Act
+
         var result = service.Schedule("Shaylo", 2, 5);
-        //Assert
+
         Assert.True(result);
         Assert.Contains("Shaylo", repo.SavedAppointments);
     }
 }
-/*/
- Caso Veterinaria
-Actor: Recepcionista
-Que hace: Programar citas
-Restricciones: limite 2 citas, no repetir mascota, doctor no disponible
-Resultado positivo: Se programa la cita, Se defina el horario
+```
 
-Actor
-Recepcionista
+### Caso Veterinaria
 
-Acción
-Programar cita
-
-Restricciones
-horario lleno
-mascota sin nombre
-doctor no disponible
-
-Resultado positivo
-cita creada
-cita guardada
-/*/
-
-
+* **Actor:** Recepcionista
+* **Acción:** Programar cita
+* **Restricciones:** horario lleno, mascota sin nombre, doctor no disponible
+* **Resultado positivo:** cita creada, cita guardada
 
 ---
 
 ## Gym-System
 
-- Reservation-Service
+### Reservation-Service
 
+```csharp
 namespace Gym_System;
 
 public interface IRepository
 {
     void Save(string classId);
 }
-
 
 public class ReservationService
 {
@@ -165,32 +148,21 @@ public class ReservationService
     {
         if (current >= max)
             return false;
-        
+
         _repo.Save(classId);
         return true;
     }
-    
+
     public bool CanReserve(int current, int max)
     {
         return current < max;
     }
-
-    public bool ReserveIsValid(string classId, int current, int max)
-    {
-        if (current < max)
-        {
-            _repo.Save(classId);
-            return true;  
-        }
-        return false;
-        
-    }
-    
 }
+```
 
+### FakeRepository
 
-- FakeRepository
-
+```csharp
 namespace Gym_System;
 
 public class FakeRepository : IRepository
@@ -202,11 +174,14 @@ public class FakeRepository : IRepository
         SavedReservations.Add(classId);
     }
 }
+```
 
-- ReservationServiceTests
+### ReservationServiceTests
 
+```csharp
 using Xunit;
 using Moq;
+
 namespace Gym_System.Tests;
 
 public class ReservationServiceTests
@@ -214,24 +189,22 @@ public class ReservationServiceTests
     [Fact]
     public void ShouldReturnTrue_WhenThereIsSpace()
     {
-        //Arrange
         var mockRepo = new Mock<IRepository>();
         var service = new ReservationService(mockRepo.Object);
-        //Act
+
         var result = service.CanReserve(3, 10);
-        //Assert
+
         Xunit.Assert.True(result);
     }
 
     [Fact]
     public void ShouldCallRepository_WhenClassIsFull()
     {
-        //Arrange
         var mockRepo = new Mock<IRepository>();
         var service = new ReservationService(mockRepo.Object);
-        //Act
+
         var result = service.Reserve("A", 10, 10);
-        //Assert
+
         Xunit.Assert.False(result);
     }
 
@@ -249,13 +222,13 @@ public class ReservationServiceTests
     [Fact]
     public void ShouldSaveReservation_WhenUsingRealRepository()
     {
-        //Arrange
         var repo = new FakeRepository();
         var service = new ReservationService(repo);
-        //Act
+
         var result = service.Reserve("A1", 2, 10);
-        //Assert
+
         Xunit.Assert.True(result);
         Xunit.Assert.Contains("A1", repo.SavedReservations);
     }
 }
+```
